@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { userAPI } from '../../lib/api.js'
+import { userAPI } from '../lib/api'
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([])

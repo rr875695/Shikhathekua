@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { userAPI } from '../../lib/api.js'
+import { userAPI } from '../lib/api'
 
 export default function Profile() {
   const [user, setUser] = useState(null)

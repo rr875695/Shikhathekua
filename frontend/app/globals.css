@@ -383,16 +383,12 @@ body {
   .landing-content {
     grid-template-columns: 1fr;
     text-align: center;
-    gap: 2rem;
+    gap: 1.5rem;
   }
-  
-  .landing-text h1 {
-    font-size: 2.5rem;
-  }
-  
-  .landing-text p {
-    font-size: 1.2rem;
-  }
+  .landing-text h1 { font-size: 2.2rem; }
+  .landing-text p { font-size: 1.05rem; }
+  .landing-image img { max-width: 85%; height: auto; }
+  .explore-btn { width: 100%; text-align: center; }
   
   .content h1 {
     font-size: 2.5rem;
@@ -2204,4 +2200,35 @@ body {
   .payment-option {
     padding: 0.8rem;
   }
+}
+
+.public-nav-toggle { display: none; }
+.public-hamburger { position: relative; width: 22px; height: 18px; }
+.public-hamburger span, .public-hamburger::before, .public-hamburger::after {
+  content: '';
+  position: absolute; left: 0; right: 0; height: 2px; background: #8b4513; border-radius: 2px; transition: transform 160ms ease, opacity 160ms ease;
+}
+.public-hamburger span { top: 8px; }
+.public-hamburger::before { top: 0; }
+.public-hamburger::after { bottom: 0; }
+.public-hamburger.active span { opacity: 0; }
+.public-hamburger.active::before { transform: translateY(8px) rotate(45deg); }
+.public-hamburger.active::after { transform: translateY(-8px) rotate(-45deg); }
+
+.public-drawer { display: none; }
+.public-overlay { display: none; }
+
+@media (max-width: 900px) {
+  .navbar { display: none; }
+  .public-nav-toggle { display: inline-flex; align-items: center; gap: 8px; background: transparent; border: 1px solid rgba(139,69,19,0.3); color: #8b4513; padding: 8px 10px; border-radius: 10px; }
+  .public-drawer { position: fixed; top: 64px; left: 0; bottom: 0; width: 280px; background: #fff; border-right: 1px solid #eee; transform: translateX(-100%); transition: transform 200ms ease; z-index: 60; display: block; padding: 16px; }
+  .public-drawer.open { transform: translateX(0); }
+  .public-drawer a { display: block; padding: 10px 12px; border-radius: 8px; color: #8b4513; }
+  .public-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(2px); z-index: 55; display: none; }
+  .public-overlay.show { display: block; }
+}
+
+.auth-links { display: flex; align-items: center; gap: 1rem; }
+@media (max-width: 900px) {
+  .auth-links { display: none; }
 }

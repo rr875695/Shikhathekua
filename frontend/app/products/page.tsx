@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { userAPI } from '../../lib/api.js'
+import { userAPI } from '../lib/api'
+import { apiRequest } from '@/app/lib/api'
 
 const thekuaVarieties = [
   { id: 1, name: 'Sugar Thekua', price: 150, image: '/sugar.jpeg', description: 'Traditional sweet Thekua with sugar', flavor: 'Traditional Sweet' },
@@ -20,15 +21,20 @@ const thekuaVarieties = [
 export default function Products() {
   const [selectedVariety, setSelectedVariety] = useState('all')
   const [priceRange, setPriceRange] = useState(300)
+  const [dynamicProducts, setDynamicProducts] = useState<any[]>([])
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
     // Check if user is logged in
     const savedUser = localStorage.getItem('thekua_user')
     setIsLoggedIn(!!savedUser)
+    // Load products from backend
+    apiRequest('/products', 'GET').then((data) => setDynamicProducts(data || [])).catch(() => setDynamicProducts([]))
   }, [])
 
-  const filteredProducts = thekuaVarieties.filter(product => {
+  const allProducts = dynamicProducts.map((p) => ({ id: p._id, name: p.name, price: p.price, image: p.image || '/sugar.jpeg', description: p.description || '' }))
+
+  const filteredProducts = allProducts.filter(product => {
     const varietyMatch = selectedVariety === 'all' || product.name.toLowerCase().includes(selectedVariety.toLowerCase())
     const priceMatch = product.price <= priceRange
     return varietyMatch && priceMatch
@@ -77,6 +83,16 @@ export default function Products() {
     }
   }
 
+  const getSafeImageSrc = (src?: string) => {
+    if (!src || typeof src !== 'string') return '/sugar.jpeg'
+    const trimmed = src.trim()
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
+    // Ensure relative paths always start with '/'
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+  }
+
+  const isExternal = (src: string) => src.startsWith('http://') || src.startsWith('https://')
+
   return (
     <div className="products-page">
       <div className="container">
@@ -116,36 +132,50 @@ export default function Products() {
 
         {/* Products Grid */}
         <div className="products-grid">
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="product-card">
-              <div className="product-image">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  width={300}
-                  height={200}
-                  className="product-img"
-                />
-              </div>
-              <div className="product-info">
-                <h3 className="product-name">{product.name}</h3>
-                <p className="product-flavor">{product.flavor}</p>
-                <p className="product-description">{product.description}</p>
-                <div className="product-price">₹{product.price}</div>
-                <div className="product-actions">
-                  <Link href={`/products/${product.id}`} className="view-details-btn">
-                    View Details
-                  </Link>
-                  <button 
-                    onClick={() => handleAddToCart(product)}
-                    className="add-to-cart-btn"
-                  >
-                    Add to Cart
-                  </button>
+          {filteredProducts.map((product) => {
+            const safeSrc = getSafeImageSrc(product.image)
+            const external = isExternal(safeSrc)
+            return (
+              <div key={product.id} className="product-card">
+                <div className="product-image">
+                  {external ? (
+                    <img
+                      src={safeSrc}
+                      alt={product.name}
+                      width={300}
+                      height={200}
+                      className="product-img"
+                    />
+                  ) : (
+                    <Image
+                      src={safeSrc}
+                      alt={product.name}
+                      width={300}
+                      height={200}
+                      className="product-img"
+                    />
+                  )}
+                </div>
+                <div className="product-info">
+                  <h3 className="product-name">{product.name}</h3>
+                  <p className="product-flavor">{product.flavor}</p>
+                  <p className="product-description">{product.description}</p>
+                  <div className="product-price">₹{product.price}</div>
+                  <div className="product-actions">
+                    <Link href={`/products/${product.id}`} className="view-details-btn">
+                      View Details
+                    </Link>
+                    <button 
+                      onClick={() => handleAddToCart(product)}
+                      className="add-to-cart-btn"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>

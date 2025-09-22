@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { userAPI } from '../../lib/api.js'
+import { userAPI } from '../lib/api'
 
 export default function Orders() {
   const [orders, setOrders] = useState([])
@@ -19,7 +19,24 @@ export default function Orders() {
         try {
           // Load orders from backend
           const ordersResponse = await userAPI.getOrders()
-          setOrders(ordersResponse.orders || [])
+          const normalized = (ordersResponse.orders || []).map((o) => ({
+            id: o.orderId || o._id || `ord-${Math.random().toString(36).slice(2)}`,
+            items: (o.items || []).map((it, idx) => ({
+              id: it.id || it._id || `${o.orderId || o._id}-item-${idx}`,
+              name: it.name,
+              price: it.price,
+              image: it.image,
+              description: it.description,
+              quantity: it.quantity
+            })),
+            totalAmount: o.totalAmount,
+            orderDate: o.orderDate,
+            orderTime: o.orderTime,
+            status: o.status,
+            deliveryDate: o.deliveryDate,
+            rating: o.rating || 0
+          }))
+          setOrders(normalized)
         } catch (error) {
           console.error('Error loading orders:', error)
           // Load sample orders as fallback
@@ -39,7 +56,7 @@ export default function Orders() {
         id: 'ORD001',
         items: [
           {
-            id: 1,
+            id: '1',
             name: 'Sugar Thekua',
             price: 150,
             image: '/thekua1.jpg',
@@ -47,7 +64,7 @@ export default function Orders() {
             quantity: 2
           },
           {
-            id: 2,
+            id: '2',
             name: 'Flavoured Thekua',
             price: 180,
             image: '/thekua1.jpg',
@@ -66,7 +83,7 @@ export default function Orders() {
         id: 'ORD002',
         items: [
           {
-            id: 3,
+            id: '3',
             name: 'Fruit Thekua',
             price: 200,
             image: '/thekua1.jpg',
@@ -85,7 +102,7 @@ export default function Orders() {
         id: 'ORD003',
         items: [
           {
-            id: 1,
+            id: '1',
             name: 'Sugar Thekua',
             price: 150,
             image: '/thekua1.jpg',
@@ -217,8 +234,8 @@ export default function Orders() {
                   </div>
 
                   <div className="order-items">
-                    {order.items.map((item, index) => (
-                      <div key={index} className="order-item">
+                    {order.items.map((item) => (
+                      <div key={`${order.id}-${item.id}`} className="order-item">
                         <div className="item-image">
                           <img src={item.image} alt={item.name} />
                         </div>
@@ -245,7 +262,7 @@ export default function Orders() {
                         <div className="star-rating">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
-                              key={star}
+                              key={`${order.id}-star-${star}`}
                               className={`star ${star <= order.rating ? 'active' : ''}`}
                               onClick={() => handleRating(order.id, star)}
                             >
