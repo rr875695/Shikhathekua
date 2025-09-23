@@ -11,6 +11,55 @@ body {
   background-color: #f8f9fa;
 }
 
+/* Global Preloader */
+.preloader-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.05), rgba(0,0,0,0.15));
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+}
+
+.preloader {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: grid;
+  place-items: center;
+}
+
+.preloader-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 6px solid rgba(212, 175, 55, 0.25);
+  border-top-color: #d4af37;
+  border-right-color: #f4d03f;
+  animation: spin 1s linear infinite;
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.35) inset;
+}
+
+.preloader-core {
+  position: relative;
+  z-index: 2;
+  font-weight: 800;
+  color: #8b4513;
+  background: linear-gradient(135deg, #8b4513, #d4af37);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 18px rgba(212,175,55,0.35);
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;

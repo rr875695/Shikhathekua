@@ -30,61 +30,52 @@ export default function OrdersPage() {
 
   return (
     <div className="p-6">
-      <div className="admin-card">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-xl font-bold">Manage Orders</h1>
-            <p className="text-slate-600 text-sm">Track and update customer orders</p>
-          </div>
+      <h1 className="text-xl font-bold">Manage Orders</h1>
+      {loading ? (
+        <div className="py-10 text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-green-600 border-r-transparent align-[-0.125em]"></div>
+          <p className="mt-2 text-gray-600">Loading orders...</p>
         </div>
-        {loading ? (
-          <div className="py-10 text-center">
-            <div className="inline-block h-8 w-8 admin-spinner"></div>
-            <p className="mt-2 text-gray-600">Loading orders...</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border border-slate-200 mt-2">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="p-3 border border-slate-200 text-left">Order ID</th>
-                  <th className="p-3 border border-slate-200 text-left">Customer</th>
-                  <th className="p-3 border border-slate-200 text-left">Total</th>
-                  <th className="p-3 border border-slate-200 text-left">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((o) => (
-                  <tr key={o._id} className="border border-slate-200">
-                    <td className="p-3">{o.orderId}</td>
-                    <td className="p-3">{o.user?.name || o.customerDetails?.name || '-'}</td>
-                    <td className="p-3">₹{o.totalAmount}</td>
-                    <td className="p-3 space-x-2">
-                      <select
-                        value={pendingStatus[o._id] ?? o.status}
-                        onChange={(e) => setPendingStatus((prev) => ({ ...prev, [o._id]: e.target.value }))}
-                        className="border p-2 rounded"
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="Processing">Processing</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled">Cancelled</option>
-                      </select>
-                      <button
-                        onClick={() => updateStatus(o._id, pendingStatus[o._id] ?? o.status)}
-                        className="admin-btn px-4 py-2"
-                      >
-                        Submit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      ) : (
+      <table className="w-full border mt-4">
+        <thead>
+          <tr className="bg-gray-200">
+            <th className="p-2 border">Order ID</th>
+            <th className="p-2 border">Customer</th>
+            <th className="p-2 border">Total</th>
+            <th className="p-2 border">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {orders.map((o) => (
+            <tr key={o._id} className="border">
+              <td className="p-2">{o.orderId}</td>
+              <td className="p-2">{o.user?.name || o.customerDetails?.name}</td>
+              <td className="p-2">₹{o.totalAmount}</td>
+              <td className="p-2 space-x-2">
+                <select
+                  value={pendingStatus[o._id] ?? o.status}
+                  onChange={(e) => setPendingStatus((prev) => ({ ...prev, [o._id]: e.target.value }))}
+                  className="border p-1"
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Processing">Processing</option>
+                  <option value="Shipped">Shipped</option>
+                  <option value="Delivered">Delivered</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+                <button
+                  onClick={() => updateStatus(o._id, pendingStatus[o._id] ?? o.status)}
+                  className="admin-btn px-3 py-1"
+                >
+                  Submit
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      )}
     </div>
   );
 }

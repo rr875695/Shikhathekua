@@ -116,6 +116,15 @@ export default function RootLayout({ children, }) {
           </>
         )}
 
+        {loading && (
+          <div className="preloader-overlay" role="status" aria-live="polite" aria-label="Loading">
+            <div className="preloader">
+              <span className="preloader-ring"></span>
+              <span className="preloader-core">Thekua!</span>
+            </div>
+          </div>
+        )}
+
         <main>{children}</main>
       </body>
     </html>
