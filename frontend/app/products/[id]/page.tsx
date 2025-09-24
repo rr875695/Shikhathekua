@@ -1,3 +1,4 @@
+import { PageProps } from 'next/types'
 import Link from 'next/link'
 
 const thekuaDetails = {
@@ -51,7 +52,11 @@ const thekuaDetails = {
   }
 }
 
-export default function ProductDetails({ params }: { params: { id: string } }) {
+type Params = {
+  id: string
+}
+
+export default function ProductDetails({ params }: PageProps<Params>) {
   const product = thekuaDetails[params.id as keyof typeof thekuaDetails]
 
   if (!product) {
@@ -72,11 +77,7 @@ export default function ProductDetails({ params }: { params: { id: string } }) {
         
         <div className="product-details-content">
           <div className="product-image-section">
-            <div className="product-image">
-              <div className="image-placeholder">
-                <div className="thekua-icon">🍪</div>
-              </div>
-            </div>
+            <img src={product.image} alt={product.name} className="product-image" />
           </div>
           
           <div className="product-info-section">
@@ -116,11 +117,3 @@ export default function ProductDetails({ params }: { params: { id: string } }) {
     </div>
   )
 }
-
-
-
-
-
-
-
-
