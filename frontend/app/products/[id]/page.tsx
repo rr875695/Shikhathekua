@@ -1,7 +1,4 @@
-'use client'
-
-import { useState } from 'react'
-import Link from 'next/link'
+import ProductDetailsClient from './ProductDetailsClient'
 
 // Sample product data
 const products = {
@@ -55,91 +52,12 @@ const products = {
   }
 }
 
-// ✅ Correct type for params
-type ProductPageProps = {
-  params: {
-    id: string
-  }
-}
-
-// ✅ Generate static params (important for Next.js App Router)
+// ✅ Generate static params for build
 export function generateStaticParams() {
   return Object.keys(products).map((id) => ({ id }))
 }
 
-export default function ProductDetails({ params }: ProductPageProps) {
-  const product = products[params.id as keyof typeof products]
-  const [addedToCart, setAddedToCart] = useState(false)
-
-  if (!product) {
-    return (
-      <div className="product-details-page">
-        <div className="container">
-          <h1>Product not found</h1>
-          <Link href="/products" className="back-btn">← Back to Products</Link>
-        </div>
-      </div>
-    )
-  }
-
-  const handleAddToCart = () => {
-    console.log(`Added to cart: ${product.name}`)
-    setAddedToCart(true)
-    alert(`${product.name} added to cart!`)
-    // Integrate your real cart API here
-  }
-
-  const handleBuyNow = () => {
-    alert(`Proceeding to buy ${product.name}`)
-    // Integrate your real checkout flow here
-  }
-
-  return (
-    <div className="product-details-page">
-      <div className="container">
-        <Link href="/products" className="back-btn">← Back to Products</Link>
-
-        <div className="product-details-content">
-          <div className="product-image-section">
-            <img src={product.image} alt={product.name} className="product-image" />
-          </div>
-
-          <div className="product-info-section">
-            <h1 className="product-title">{product.name}</h1>
-            <div className="product-price">₹{product.price}</div>
-
-            <section className="product-description">
-              <h3>Description</h3>
-              <p>{product.description}</p>
-            </section>
-
-            <section className="product-ingredients">
-              <h3>Ingredients</h3>
-              <ul>
-                {product.ingredients.map((ing, idx) => <li key={idx}>{ing}</li>)}
-              </ul>
-            </section>
-
-            <section className="product-benefits">
-              <h3>Benefits</h3>
-              <ul>
-                {product.benefits.map((benefit, idx) => <li key={idx}>{benefit}</li>)}
-              </ul>
-            </section>
-
-            <div className="product-actions">
-              <button 
-                className="add-to-cart-btn" 
-                onClick={handleAddToCart} 
-                disabled={addedToCart}
-              >
-                {addedToCart ? 'Added to Cart' : 'Add to Cart'}
-              </button>
-              <button className="buy-now-btn" onClick={handleBuyNow}>Buy Now</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+export default function ProductPage({ params }: { params: { id: string } }) {
+  const product = products[params.id as keyof typeof products] || null
+  return <ProductDetailsClient product={product} />
 }
