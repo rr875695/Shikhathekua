@@ -1,6 +1,6 @@
 module.exports = {
   // MongoDB Configuration
-  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/thekua_db',
+  MONGODB_URI: process.env.MONGODB_URI ,
   
   // JWT Secret Key
   JWT_SECRET: process.env.JWT_SECRET || 'thekua_super_secret_key_2024_secure_authentication',
