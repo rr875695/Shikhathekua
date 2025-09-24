@@ -1,11 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { userAPI } from '../lib/api'
 
+// TypeScript interface for user
+interface User {
+  name: string
+  email: string
+  mobile: string
+  dateOfBirth?: string
+  dob?: string
+  avatar?: string
+}
+
 export default function Profile() {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<User | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -13,26 +23,25 @@ export default function Profile() {
     mobile: '',
     dateOfBirth: ''
   })
-  const [profileImage, setProfileImage] = useState(null)
+  const [profileImage, setProfileImage] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
     const loadProfile = async () => {
       const savedUser = localStorage.getItem('thekua_user')
       if (savedUser) {
-        const userData = JSON.parse(savedUser)
+        const userData: User = JSON.parse(savedUser)
         setUser(userData)
         setFormData({
           name: userData.name || '',
           email: userData.email || '',
           mobile: userData.mobile || '',
-          dateOfBirth: userData.dateOfBirth || ''
+          dateOfBirth: userData.dateOfBirth || userData.dob || ''
         })
-        
+
         try {
-          // Load profile from backend
           const profileResponse = await userAPI.getProfile()
-          const backendUser = profileResponse.user
+          const backendUser: User = profileResponse.user
           setUser(backendUser)
           setFormData({
             name: backendUser.name || '',
@@ -42,7 +51,6 @@ export default function Profile() {
           })
         } catch (error) {
           console.error('Error loading profile:', error)
-          // Use localStorage data as fallback
         }
       } else {
         router.push('/login')
@@ -52,20 +60,21 @@ export default function Profile() {
     loadProfile()
   }, [router])
 
-  const handleInputChange = (e) => {
+  // Typed input change handler
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }))
   }
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0]
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
     if (file) {
       const reader = new FileReader()
-      reader.onload = (e) => {
-        setProfileImage(e.target.result)
+      reader.onload = (event) => {
+        if (event.target?.result) setProfileImage(event.target.result as string)
       }
       reader.readAsDataURL(file)
     }
@@ -73,7 +82,6 @@ export default function Profile() {
 
   const handleSave = async () => {
     try {
-      // Update profile on backend
       const updateData = {
         name: formData.name,
         email: formData.email,
@@ -81,11 +89,10 @@ export default function Profile() {
         dob: formData.dateOfBirth,
         avatar: profileImage
       }
-      
+
       const response = await userAPI.updateProfile(updateData)
-      const updatedUser = response.user
-      
-      // Update localStorage
+      const updatedUser: User = response.user
+
       localStorage.setItem('thekua_user', JSON.stringify(updatedUser))
       setUser(updatedUser)
       setIsEditing(false)
@@ -96,13 +103,11 @@ export default function Profile() {
     }
   }
 
-  const getInitials = (name) => {
-    return name ? name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'
+  const getInitials = (name?: string) => {
+    return name ? name.split(' ').map((n) => n[0]).join('').toUpperCase() : 'U'
   }
 
-  if (!user) {
-    return <div>Loading...</div>
-  }
+  if (!user) return <div>Loading...</div>
 
   return (
     <div className="profile-page">
