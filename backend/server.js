@@ -17,7 +17,7 @@ const path = require('path');
 const app = express();
 const PORT = config.PORT;
 
-app.use(cors({ origin: ['http://localhost:3000', 'http://127.0.0.1:3000'], credentials: true }));
+app.use(cors({ origin: ['http://localhost:3000', 'http://127.0.0.1:3000','https://shikhathekua.onrender.com'], credentials: true }));
 app.use(express.json());
 
 // Ensure uploads directory exists and is served static
