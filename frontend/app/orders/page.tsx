@@ -4,24 +4,48 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { userAPI } from '../lib/api'
 
+interface OrderItem {
+  id: string
+  name: string
+  price: number
+  image: string
+  description: string
+  quantity: number
+}
+
+interface Order {
+  id: string
+  items: OrderItem[]
+  totalAmount: number
+  orderDate: string
+  orderTime: string
+  status: string
+  deliveryDate?: string
+  rating: number
+}
+
+interface User {
+  name: string
+  email: string
+}
+
 export default function Orders() {
-  const [orders, setOrders] = useState([])
-  const [user, setUser] = useState(null)
+  const [orders, setOrders] = useState<Order[]>([])
+  const [user, setUser] = useState<User | null>(null)
   const router = useRouter()
 
   useEffect(() => {
     const loadOrders = async () => {
       const savedUser = localStorage.getItem('thekua_user')
       if (savedUser) {
-        const userData = JSON.parse(savedUser)
+        const userData: User = JSON.parse(savedUser)
         setUser(userData)
         
         try {
-          // Load orders from backend
           const ordersResponse = await userAPI.getOrders()
-          const normalized = (ordersResponse.orders || []).map((o) => ({
+          const normalized: Order[] = (ordersResponse.orders || []).map((o: any) => ({
             id: o.orderId || o._id || `ord-${Math.random().toString(36).slice(2)}`,
-            items: (o.items || []).map((it, idx) => ({
+            items: (o.items || []).map((it: any, idx: number) => ({
               id: it.id || it._id || `${o.orderId || o._id}-item-${idx}`,
               name: it.name,
               price: it.price,
@@ -39,7 +63,6 @@ export default function Orders() {
           setOrders(normalized)
         } catch (error) {
           console.error('Error loading orders:', error)
-          // Load sample orders as fallback
           loadSampleOrders()
         }
       } else {
@@ -51,26 +74,12 @@ export default function Orders() {
   }, [router])
 
   const loadSampleOrders = () => {
-    const sampleOrders = [
+    const sampleOrders: Order[] = [
       {
         id: 'ORD001',
         items: [
-          {
-            id: '1',
-            name: 'Sugar Thekua',
-            price: 150,
-            image: '/thekua1.jpg',
-            description: 'Traditional sweet Thekua with sugar',
-            quantity: 2
-          },
-          {
-            id: '2',
-            name: 'Flavoured Thekua',
-            price: 180,
-            image: '/thekua1.jpg',
-            description: 'Thekua with various flavors',
-            quantity: 1
-          }
+          { id: '1', name: 'Sugar Thekua', price: 150, image: '/thekua1.jpg', description: 'Traditional sweet Thekua with sugar', quantity: 2 },
+          { id: '2', name: 'Flavoured Thekua', price: 180, image: '/thekua1.jpg', description: 'Thekua with various flavors', quantity: 1 }
         ],
         totalAmount: 480,
         orderDate: '2024-01-15',
@@ -82,14 +91,7 @@ export default function Orders() {
       {
         id: 'ORD002',
         items: [
-          {
-            id: '3',
-            name: 'Fruit Thekua',
-            price: 200,
-            image: '/thekua1.jpg',
-            description: 'Thekua with fruit essence',
-            quantity: 3
-          }
+          { id: '3', name: 'Fruit Thekua', price: 200, image: '/thekua1.jpg', description: 'Thekua with fruit essence', quantity: 3 }
         ],
         totalAmount: 600,
         orderDate: '2024-01-20',
@@ -101,14 +103,7 @@ export default function Orders() {
       {
         id: 'ORD003',
         items: [
-          {
-            id: '1',
-            name: 'Sugar Thekua',
-            price: 150,
-            image: '/thekua1.jpg',
-            description: 'Traditional sweet Thekua with sugar',
-            quantity: 1
-          }
+          { id: '1', name: 'Sugar Thekua', price: 150, image: '/thekua1.jpg', description: 'Traditional sweet Thekua with sugar', quantity: 1 }
         ],
         totalAmount: 150,
         orderDate: '2024-01-25',
@@ -121,7 +116,7 @@ export default function Orders() {
     setOrders(sampleOrders)
   }
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'delivered': return '#28a745'
       case 'shipped': return '#17a2b8'
@@ -131,7 +126,7 @@ export default function Orders() {
     }
   }
 
-  const getStatusText = (status) => {
+  const getStatusText = (status: string) => {
     switch (status) {
       case 'delivered': return 'Delivered'
       case 'shipped': return 'Shipped'
@@ -141,17 +136,16 @@ export default function Orders() {
     }
   }
 
-  const handleRating = (orderId, rating) => {
+  const handleRating = (orderId: string, rating: number) => {
     setOrders(prev => prev.map(order => 
       order.id === orderId ? { ...order, rating } : order
     ))
   }
 
-  const handleReorder = async (order) => {
+  const handleReorder = async (order: Order) => {
     try {
-      // Get current cart from backend
       const cartResponse = await userAPI.getCart()
-      let cartItems = cartResponse.cart || []
+      let cartItems: any[] = cartResponse.cart || []
 
       order.items.forEach(orderItem => {
         const existingCartItem = cartItems.find(item => item.id === orderItem.id)
@@ -162,18 +156,10 @@ export default function Orders() {
               : item
           )
         } else {
-          cartItems.push({
-            id: orderItem.id,
-            name: orderItem.name,
-            price: orderItem.price,
-            image: orderItem.image,
-            description: orderItem.description,
-            quantity: orderItem.quantity,
-          })
+          cartItems.push({ ...orderItem })
         }
       })
 
-      // Update cart on backend
       await userAPI.updateCart(cartItems)
       alert('Items added to cart! Redirecting to checkout...')
       router.push('/cart')
@@ -183,18 +169,12 @@ export default function Orders() {
     }
   }
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    return date.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
   }
 
-  if (!user) {
-    return <div>Loading...</div>
-  }
+  if (!user) return <div>Loading...</div>
 
   return (
     <div className="orders-page">
@@ -224,10 +204,7 @@ export default function Orders() {
                       </p>
                     </div>
                     <div className="order-status">
-                      <span 
-                        className="status-badge"
-                        style={{ backgroundColor: getStatusColor(order.status) }}
-                      >
+                      <span className="status-badge" style={{ backgroundColor: getStatusColor(order.status) }}>
                         {getStatusText(order.status)}
                       </span>
                     </div>
@@ -274,10 +251,7 @@ export default function Orders() {
                     )}
 
                     <div className="order-actions">
-                      <button 
-                        className="reorder-btn"
-                        onClick={() => handleReorder(order)}
-                      >
+                      <button className="reorder-btn" onClick={() => handleReorder(order)}>
                         🔄 Reorder
                       </button>
                     </div>
