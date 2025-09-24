@@ -4,7 +4,7 @@ import { useState, ChangeEvent, FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-const API_BASE_URL = 'https://shikhathekua-1.onrender.com/'
+const API_BASE_URL = 'https://shikhathekua-1.onrender.com'
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true)
