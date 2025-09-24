@@ -5,11 +5,34 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { userAPI } from '../lib/api'
 
+interface CartItem {
+  id: string
+  name: string
+  price: number
+  quantity: number
+  description?: string
+  image?: string
+}
+
+interface User {
+  _id: string
+  name: string
+  email: string
+}
+
+interface CheckoutData {
+  name: string
+  address: string
+  contact: string
+  location: string
+  paymentMethod: 'cod' | 'upi' | 'card'
+}
+
 export default function Cart() {
-  const [cartItems, setCartItems] = useState([])
-  const [user, setUser] = useState(null)
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [user, setUser] = useState<User | null>(null)
   const [showCheckout, setShowCheckout] = useState(false)
-  const [checkoutData, setCheckoutData] = useState({
+  const [checkoutData, setCheckoutData] = useState<CheckoutData>({
     name: '',
     address: '',
     contact: '',
@@ -22,11 +45,10 @@ export default function Cart() {
     const loadCart = async () => {
       const savedUser = localStorage.getItem('thekua_user')
       if (savedUser) {
-        const userData = JSON.parse(savedUser)
+        const userData: User = JSON.parse(savedUser)
         setUser(userData)
         
         try {
-          // Load cart from backend
           const cartResponse = await userAPI.getCart()
           setCartItems(cartResponse.cart || [])
         } catch (error) {
@@ -41,7 +63,7 @@ export default function Cart() {
     loadCart()
   }, [router])
 
-  const updateQuantity = async (itemId, newQuantity) => {
+  const updateQuantity = async (itemId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
       removeItem(itemId)
       return
@@ -60,7 +82,7 @@ export default function Cart() {
     }
   }
 
-  const removeItem = async (itemId) => {
+  const removeItem = async (itemId: string) => {
     const updatedCart = cartItems.filter(item => item.id !== itemId)
     setCartItems(updatedCart)
     
@@ -68,7 +90,7 @@ export default function Cart() {
       await userAPI.updateCart(updatedCart)
     } catch (error) {
       console.error('Error removing item:', error)
-      alert('Error removing item. Please try again.')
+      alert('Error removing cart item. Please try again.')
     }
   }
 
@@ -83,13 +105,8 @@ export default function Cart() {
     }
   }
 
-  const getTotalAmount = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
-  }
-
-  const getTotalItems = () => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0)
-  }
+  const getTotalAmount = () => cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
+  const getTotalItems = () => cartItems.reduce((total, item) => total + item.quantity, 0)
 
   const proceedToCheckout = () => {
     if (cartItems.length === 0) {
@@ -99,7 +116,7 @@ export default function Cart() {
     setShowCheckout(true)
   }
 
-  const handleCheckoutInputChange = (e) => {
+  const handleCheckoutInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setCheckoutData(prev => ({
       ...prev,
@@ -108,14 +125,12 @@ export default function Cart() {
   }
 
   const placeOrder = async () => {
-    // Validate form
     if (!checkoutData.name || !checkoutData.address || !checkoutData.contact) {
       alert('Please fill in all required fields!')
       return
     }
 
     try {
-      // Create order
       const order = {
         id: `ORD${Date.now()}`,
         items: cartItems,
@@ -127,10 +142,7 @@ export default function Cart() {
         deliveryDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       }
 
-      // Save order to backend
       await userAPI.createOrder(order)
-
-      // Clear cart
       setCartItems([])
       await userAPI.updateCart([])
       setShowCheckout(false)
@@ -143,9 +155,7 @@ export default function Cart() {
     }
   }
 
-  if (!user) {
-    return <div>Loading...</div>
-  }
+  if (!user) return <div>Loading...</div>
 
   return (
     <div className="cart-page">
@@ -200,9 +210,7 @@ export default function Cart() {
                       </button>
                     </div>
 
-                    <div className="item-total">
-                      ₹{item.price * item.quantity}
-                    </div>
+                    <div className="item-total">₹{item.price * item.quantity}</div>
 
                     <button 
                       className="remove-btn"
@@ -215,18 +223,8 @@ export default function Cart() {
               </div>
 
               <div className="cart-actions">
-                <button 
-                  className="clear-cart-btn"
-                  onClick={clearCart}
-                >
-                  Clear Cart
-                </button>
-                <button 
-                  className="checkout-btn"
-                  onClick={proceedToCheckout}
-                >
-                  Place Order
-                </button>
+                <button className="clear-cart-btn" onClick={clearCart}>Clear Cart</button>
+                <button className="checkout-btn" onClick={proceedToCheckout}>Place Order</button>
               </div>
             </div>
           )}
@@ -237,12 +235,7 @@ export default function Cart() {
               <div className="checkout-form-container">
                 <div className="checkout-header">
                   <h2>Place Your Order</h2>
-                  <button 
-                    className="close-btn"
-                    onClick={() => setShowCheckout(false)}
-                  >
-                    ✕
-                  </button>
+                  <button className="close-btn" onClick={() => setShowCheckout(false)}>✕</button>
                 </div>
 
                 <div className="checkout-content">
@@ -256,9 +249,7 @@ export default function Cart() {
                         </div>
                       ))}
                     </div>
-                    <div className="summary-total">
-                      <strong>Total: ₹{getTotalAmount()}</strong>
-                    </div>
+                    <div className="summary-total"><strong>Total: ₹{getTotalAmount()}</strong></div>
                   </div>
 
                   <form className="checkout-form">
@@ -266,121 +257,41 @@ export default function Cart() {
                     
                     <div className="form-group">
                       <label htmlFor="name">Full Name *</label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={checkoutData.name}
-                        onChange={handleCheckoutInputChange}
-                        required
-                        className="form-input"
-                        placeholder="Enter your full name"
-                      />
+                      <input type="text" id="name" name="name" value={checkoutData.name} onChange={handleCheckoutInputChange} required placeholder="Enter your full name" className="form-input" />
                     </div>
 
                     <div className="form-group">
                       <label htmlFor="contact">Contact Number *</label>
-                      <input
-                        type="tel"
-                        id="contact"
-                        name="contact"
-                        value={checkoutData.contact}
-                        onChange={handleCheckoutInputChange}
-                        required
-                        className="form-input"
-                        placeholder="+91 9876543210"
-                      />
+                      <input type="tel" id="contact" name="contact" value={checkoutData.contact} onChange={handleCheckoutInputChange} required placeholder="+91 9876543210" className="form-input" />
                     </div>
 
                     <div className="form-group">
                       <label htmlFor="address">Delivery Address *</label>
-                      <textarea
-                        id="address"
-                        name="address"
-                        value={checkoutData.address}
-                        onChange={handleCheckoutInputChange}
-                        required
-                        className="form-textarea"
-                        placeholder="Enter complete delivery address"
-                        rows="3"
-                      />
+                      <textarea id="address" name="address" value={checkoutData.address} onChange={handleCheckoutInputChange} required placeholder="Enter complete delivery address" rows={3} className="form-textarea" />
                     </div>
 
                     <div className="form-group">
                       <label htmlFor="location">City/Location</label>
-                      <input
-                        type="text"
-                        id="location"
-                        name="location"
-                        value={checkoutData.location}
-                        onChange={handleCheckoutInputChange}
-                        className="form-input"
-                        placeholder="Enter your city"
-                      />
+                      <input type="text" id="location" name="location" value={checkoutData.location} onChange={handleCheckoutInputChange} placeholder="Enter your city" className="form-input" />
                     </div>
 
                     <div className="form-group">
                       <label>Payment Method *</label>
                       <div className="payment-options">
-                        <label className="payment-option">
-                          <input
-                            type="radio"
-                            name="paymentMethod"
-                            value="cod"
-                            checked={checkoutData.paymentMethod === 'cod'}
-                            onChange={handleCheckoutInputChange}
-                          />
-                          <span className="payment-label">
-                            <span className="payment-icon">💵</span>
-                            Cash on Delivery
-                          </span>
-                        </label>
-
-                        <label className="payment-option">
-                          <input
-                            type="radio"
-                            name="paymentMethod"
-                            value="upi"
-                            checked={checkoutData.paymentMethod === 'upi'}
-                            onChange={handleCheckoutInputChange}
-                          />
-                          <span className="payment-label">
-                            <span className="payment-icon">📱</span>
-                            UPI Payment
-                          </span>
-                        </label>
-
-                        <label className="payment-option">
-                          <input
-                            type="radio"
-                            name="paymentMethod"
-                            value="card"
-                            checked={checkoutData.paymentMethod === 'card'}
-                            onChange={handleCheckoutInputChange}
-                          />
-                          <span className="payment-label">
-                            <span className="payment-icon">💳</span>
-                            Debit/Credit Card
-                          </span>
-                        </label>
+                        {['cod', 'upi', 'card'].map(method => (
+                          <label key={method} className="payment-option">
+                            <input type="radio" name="paymentMethod" value={method} checked={checkoutData.paymentMethod === method} onChange={handleCheckoutInputChange} />
+                            <span className="payment-label">
+                              {method === 'cod' ? '💵 Cash on Delivery' : method === 'upi' ? '📱 UPI Payment' : '💳 Debit/Credit Card'}
+                            </span>
+                          </label>
+                        ))}
                       </div>
                     </div>
 
                     <div className="checkout-actions">
-                      <button 
-                        type="button"
-                        className="cancel-btn"
-                        onClick={() => setShowCheckout(false)}
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        type="button"
-                        className="place-order-btn"
-                        onClick={placeOrder}
-                      >
-                        Place Order - ₹{getTotalAmount()}
-                      </button>
+                      <button type="button" className="cancel-btn" onClick={() => setShowCheckout(false)}>Cancel</button>
+                      <button type="button" className="place-order-btn" onClick={placeOrder}>Place Order - ₹{getTotalAmount()}</button>
                     </div>
                   </form>
                 </div>
