@@ -1,0 +1,42 @@
+frontend
+{
+"name": "thekua",
+"version": "1.0.0",
+"description": "Thekua website with Next.js frontend and Express backend",
+"private": true,
+"scripts": {
+"dev": "next dev",
+"build": "next build",
+"start": "next start",
+"lint": "next lint",
+"backend": "node server.js",
+"backend:dev": "nodemon server.js"
+},
+"dependencies": {
+"bcryptjs": "^2.4.3",
+"cors": "^2.8.5",
+"dotenv": "^16.6.1",
+"express": "^4.21.2",
+"express-validator": "^7.2.1",
+"jsonwebtoken": "^9.0.2",
+"mongoose": "^7.8.7",
+"next": "^15.5.2",
+"react": "^18.3.1",
+"react-dom": "^18.3.1"
+},
+"devDependencies": {
+"@types/react": "19.1.13",
+"nodemon": "^3.1.10",
+"typescript": "5.9.2"
+},
+"keywords": [
+"thekua",
+"backend",
+"api",
+"mongodb",
+"authentication"
+],
+"author": "Thekua Team",
+"license": "MIT"
+}
+
