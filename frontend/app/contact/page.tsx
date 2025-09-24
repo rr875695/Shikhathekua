@@ -93,7 +93,15 @@ export default function Contact() {
           <div className="contact-info-section">
             <h2>Our Location</h2>
             <div className="map-container">
-              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3580.5270753603!2d85.86151047441314!3d26.179527291215923!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39edb75b85cc6827%3A0x6323aca3b97a9fe1!2sDarbhanga%20College%20of%20Engineering%2C%20Dar1bhanga!5e0!3m2!1sen!2sin!4v1758280144290!5m2!1sen!2sin" width="500" height="200" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+             <iframe
+  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3580.5270753603!2d85.86151047441314!3d26.179527291215923!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39edb75b85cc6827%3A0x6323aca3b97a9fe1!2sDarbhanga%20College%20of%20Engineering%2C%20Dar1bhanga!5e0!3m2!1sen!2sin!4v1758280144290!5m2!1sen!2sin"
+  width="500"
+  height="200"
+  loading="lazy"
+  referrerPolicy="no-referrer-when-downgrade"
+></iframe>
+
+
             </div>
             
             <div className="contact-details">
