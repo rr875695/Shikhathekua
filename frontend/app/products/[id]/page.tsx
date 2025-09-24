@@ -1,6 +1,9 @@
-import { PageProps } from 'next/types'
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 
+// Sample product data
 const thekuaDetails = {
   1: {
     name: 'Sugar Thekua',
@@ -52,12 +55,26 @@ const thekuaDetails = {
   }
 }
 
-type Params = {
-  id: string
+// Define type for route params
+type ProductPageProps = {
+  params: { id: string }
 }
 
-export default function ProductDetails({ params }: PageProps<Params>) {
+export default function ProductDetails({ params }: ProductPageProps) {
   const product = thekuaDetails[params.id as keyof typeof thekuaDetails]
+  const [addedToCart, setAddedToCart] = useState(false)
+
+  const handleAddToCart = () => {
+    // Replace this with actual cart API integration
+    console.log('Add to cart clicked for', product?.name)
+    setAddedToCart(true)
+    alert(`${product?.name} added to cart!`)
+  }
+
+  const handleBuyNow = () => {
+    // Replace this with actual buy flow
+    alert(`Proceeding to buy ${product?.name}`)
+  }
 
   if (!product) {
     return (
@@ -74,21 +91,21 @@ export default function ProductDetails({ params }: PageProps<Params>) {
     <div className="product-details-page">
       <div className="container">
         <Link href="/products" className="back-btn">← Back to Products</Link>
-        
+
         <div className="product-details-content">
           <div className="product-image-section">
             <img src={product.image} alt={product.name} className="product-image" />
           </div>
-          
+
           <div className="product-info-section">
             <h1 className="product-title">{product.name}</h1>
             <div className="product-price">₹{product.price}</div>
-            
+
             <div className="product-description">
               <h3>Description</h3>
               <p>{product.description}</p>
             </div>
-            
+
             <div className="ingredients">
               <h3>Ingredients</h3>
               <ul>
@@ -97,7 +114,7 @@ export default function ProductDetails({ params }: PageProps<Params>) {
                 ))}
               </ul>
             </div>
-            
+
             <div className="benefits">
               <h3>Benefits</h3>
               <ul>
@@ -106,10 +123,12 @@ export default function ProductDetails({ params }: PageProps<Params>) {
                 ))}
               </ul>
             </div>
-            
+
             <div className="product-actions">
-              <button className="add-to-cart-btn">Add to Cart</button>
-              <button className="buy-now-btn">Buy Now</button>
+              <button className="add-to-cart-btn" onClick={handleAddToCart} disabled={addedToCart}>
+                {addedToCart ? 'Added to Cart' : 'Add to Cart'}
+              </button>
+              <button className="buy-now-btn" onClick={handleBuyNow}>Buy Now</button>
             </div>
           </div>
         </div>
