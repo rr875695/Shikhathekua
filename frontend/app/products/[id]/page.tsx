@@ -52,12 +52,13 @@ const products = {
   }
 }
 
-// ✅ Generate static params for build
-export function generateStaticParams() {
+// ✅ Correct typing for generateStaticParams
+export function generateStaticParams(): { id: string }[] {
   return Object.keys(products).map((id) => ({ id }))
 }
 
+// ✅ Correct typing for page component
 export default function ProductPage({ params }: { params: { id: string } }) {
-  const product = products[params.id as keyof typeof products] || null
+  const product = products[params.id as keyof typeof products]
   return <ProductDetailsClient product={product} />
 }
