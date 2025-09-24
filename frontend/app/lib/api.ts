@@ -1,5 +1,5 @@
 // frontend/lib/api.ts
-const API_BASE_URL = "https://shikhathekua-1.onrender.com/";
+const API_BASE_URL = "https://shikhathekua-1.onrender.com";
 
 // Get auth token from localStorage
 const getAuthToken = () => {
