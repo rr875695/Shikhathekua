@@ -16,7 +16,7 @@ export default function Home() {
         </div>
         <div className="landing-image">
           <Image
-            src="/thekua1.jpg"
+            src="/thekua.jpg"
             alt="Woman holding Thekua plate"
             width={500}
             height={600}
