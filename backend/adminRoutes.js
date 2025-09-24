@@ -9,7 +9,7 @@ const { body, validationResult } = require('express-validator');
 // ========== CONFIG ==========
 const config = {
   PORT: 5000,
-  MONGODB_URI: 'mongodb://127.0.0.1:27017/thekua_db', // replace with your URI
+  MONGODB_URI: 'mongodb+srv://rr875695:Ravi@2003@cluster0.bregvnk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', // replace with your URI
   JWT_SECRET: 'your_jwt_secret_here'
 };
 
