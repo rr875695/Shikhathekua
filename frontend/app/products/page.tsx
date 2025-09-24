@@ -6,41 +6,65 @@ import Image from 'next/image'
 import { userAPI } from '../lib/api'
 import { apiRequest } from '@/app/lib/api'
 
-const thekuaVarieties = [
-  { id: 1, name: 'Sugar Thekua', price: 150, image: '/sugar.jpeg', description: 'Traditional sweet Thekua with sugar', flavor: 'Traditional Sweet' },
-  { id: 2, name: 'Flavoured Thekua', price: 180, image: '/flavour.webp', description: 'Thekua with various flavors', flavor: 'Mixed Flavors' },
-  { id: 3, name: 'Mango Thekua', price: 200, image: '/fruit.jpeg', description: 'Delicious Thekua with mango flavor', flavor: 'Fruity Fresh' },
-  { id: 4, name: 'Orange Thekua', price: 190, image: '/fruit.jpeg', description: 'Tangy Thekua with orange essence', flavor: 'Fruity Fresh' },
-  { id: 5, name: 'Apple Thekua', price: 195, image: '/fruit.jpeg', description: 'Sweet Thekua with apple flavor', flavor: 'Fruity Fresh' },
-  { id: 6, name: 'Banana Thekua', price: 185, image: '/fruit.jpeg', description: 'Creamy Thekua with banana taste', flavor: 'Fruity Fresh' },
-  { id: 7, name: 'Dry Fruit Thekua', price: 250, image: '/dryfruit.jpg', description: 'Thekua with dry fruits', flavor: 'Nutty Rich' },
-  { id: 8, name: 'Cardamom Thekua', price: 170, image: '/cardamom.jpeg', description: 'Thekua with cardamom flavor', flavor: 'Aromatic Spice' },
-  { id: 9, name: 'Coconut Thekua', price: 160, image: '/coconut.jpg', description: 'Thekua with coconut', flavor: 'Tropical Delight' },
-]
+// TypeScript interfaces
+interface Product {
+  id: string
+  name: string
+  price: number
+  image?: string
+  description?: string
+  flavor?: string
+  category?: string
+}
+
+interface CartItem extends Product {
+  quantity: number
+}
 
 export default function Products() {
-  const [selectedVariety, setSelectedVariety] = useState('all')
-  const [priceRange, setPriceRange] = useState(300)
-  const [dynamicProducts, setDynamicProducts] = useState<any[]>([])
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [products, setProducts] = useState<Product[]>([])
+  const [selectedVariety, setSelectedVariety] = useState<string>('all')
+  const [priceRange, setPriceRange] = useState<number>(300)
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(true)
 
+  // Fetch products and check login
   useEffect(() => {
-    // Check if user is logged in
     const savedUser = localStorage.getItem('thekua_user')
     setIsLoggedIn(!!savedUser)
-    // Load products from backend
-    apiRequest('/products', 'GET').then((data) => setDynamicProducts(data || [])).catch(() => setDynamicProducts([]))
+
+    apiRequest('/products', 'GET')
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const mapped = data.map((p: any) => ({
+            id: p._id,
+            name: p.name,
+            price: p.price,
+            image: p.image || '/sugar.jpeg',
+            description: p.description || '',
+            flavor: p.flavor || '',
+            category: p.category || '',
+          }))
+          setProducts(mapped)
+        } else {
+          setProducts([])
+        }
+      })
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false))
   }, [])
 
-  const allProducts = dynamicProducts.map((p) => ({ id: p._id, name: p.name, price: p.price, image: p.image || '/sugar.jpeg', description: p.description || '' }))
-
-  const filteredProducts = allProducts.filter(product => {
-    const varietyMatch = selectedVariety === 'all' || product.name.toLowerCase().includes(selectedVariety.toLowerCase())
+  // Filtered products
+  const filteredProducts = products.filter((product) => {
+    const varietyMatch =
+      selectedVariety === 'all' ||
+      product.category?.toLowerCase().includes(selectedVariety.toLowerCase())
     const priceMatch = product.price <= priceRange
     return varietyMatch && priceMatch
   })
 
-  const handleAddToCart = async (product) => {
+  // Add to cart handler
+  const handleAddToCart = async (product: Product) => {
     if (!isLoggedIn) {
       alert('Please login first to add items to cart!')
       window.location.href = '/login'
@@ -48,33 +72,19 @@ export default function Products() {
     }
 
     try {
-      // Get current cart from backend
       const cartResponse = await userAPI.getCart()
-      let cartItems = cartResponse.cart || []
+      let cartItems: CartItem[] = cartResponse.cart || []
 
-      // Check if item already exists in cart
-      const existingItem = cartItems.find(item => item.id === product.id)
-      
+      const existingItem = cartItems.find((item) => item.id === product.id)
+
       if (existingItem) {
-        // Update quantity if item exists
-        cartItems = cartItems.map(item =>
-          item.id === product.id 
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+        cartItems = cartItems.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         )
       } else {
-        // Add new item to cart
-        cartItems.push({
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          description: product.description,
-          quantity: 1
-        })
+        cartItems.push({ ...product, quantity: 1 })
       }
 
-      // Update cart on backend
       await userAPI.updateCart(cartItems)
       alert(`${product.name} added to cart!`)
     } catch (error) {
@@ -87,31 +97,32 @@ export default function Products() {
     if (!src || typeof src !== 'string') return '/sugar.jpeg'
     const trimmed = src.trim()
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
-    // Ensure relative paths always start with '/'
     return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
   }
 
   const isExternal = (src: string) => src.startsWith('http://') || src.startsWith('https://')
 
+  if (loading) return <div className="text-center mt-10">Loading products...</div>
+
   return (
     <div className="products-page">
       <div className="container">
         <h1 className="page-title">Our Thekua Collection</h1>
-        
+
         {/* Filters */}
         <div className="filters-section">
           <div className="filter-group">
             <label>Price Range: ₹{priceRange}</label>
             <input
               type="range"
-              min="100"
-              max="300"
+              min={100}
+              max={300}
               value={priceRange}
               onChange={(e) => setPriceRange(Number(e.target.value))}
               className="price-slider"
             />
           </div>
-          
+
           <div className="filter-group">
             <label>Variety:</label>
             <select
@@ -158,14 +169,14 @@ export default function Products() {
                 </div>
                 <div className="product-info">
                   <h3 className="product-name">{product.name}</h3>
-                  <p className="product-flavor">{product.flavor}</p>
-                  <p className="product-description">{product.description}</p>
+                  {product.flavor && <p className="product-flavor">{product.flavor}</p>}
+                  {product.description && <p className="product-description">{product.description}</p>}
                   <div className="product-price">₹{product.price}</div>
                   <div className="product-actions">
                     <Link href={`/products/${product.id}`} className="view-details-btn">
                       View Details
                     </Link>
-                    <button 
+                    <button
                       onClick={() => handleAddToCart(product)}
                       className="add-to-cart-btn"
                     >
