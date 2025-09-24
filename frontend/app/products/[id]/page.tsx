@@ -55,11 +55,16 @@ const products = {
   }
 }
 
-// Type for route parameters
+// ✅ Correct type for params
 type ProductPageProps = {
   params: {
     id: string
   }
+}
+
+// ✅ Generate static params (important for Next.js App Router)
+export function generateStaticParams() {
+  return Object.keys(products).map((id) => ({ id }))
 }
 
 export default function ProductDetails({ params }: ProductPageProps) {
@@ -81,12 +86,12 @@ export default function ProductDetails({ params }: ProductPageProps) {
     console.log(`Added to cart: ${product.name}`)
     setAddedToCart(true)
     alert(`${product.name} added to cart!`)
-    // Here you can integrate your real cart API
+    // Integrate your real cart API here
   }
 
   const handleBuyNow = () => {
     alert(`Proceeding to buy ${product.name}`)
-    // Here you can integrate your real checkout flow
+    // Integrate your real checkout flow here
   }
 
   return (
