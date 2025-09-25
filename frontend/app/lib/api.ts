@@ -1,10 +1,13 @@
 // frontend/lib/api.ts
-const API_BASE_URL = "https://shikhathekua-1.onrender.com";
+const API_BASE_URL = "https://shikhathekua-1.onrender.com/api";
 
 // Get auth token from localStorage
 const getAuthToken = () => {
   if (typeof window !== "undefined") {
-    return localStorage.getItem("thekua_token") || localStorage.getItem("adminToken");
+    return (
+      localStorage.getItem("thekua_token") ||
+      localStorage.getItem("adminToken")
+    );
   }
   return null;
 };
@@ -90,13 +93,19 @@ export const authAPI = {
 export const userAPI = {
   getProfile: async () => apiCall("/user/profile"),
   updateProfile: async (profileData: any) =>
-    apiCall("/user/profile", { method: "PUT", body: JSON.stringify(profileData) }),
+    apiCall("/user/profile", {
+      method: "PUT",
+      body: JSON.stringify(profileData),
+    }),
   getCart: async () => apiCall("/user/cart"),
   updateCart: async (cart: any) =>
     apiCall("/user/cart", { method: "PUT", body: JSON.stringify({ cart }) }),
   getOrders: async () => apiCall("/user/orders"),
   createOrder: async (orderData: any) =>
-    apiCall("/user/orders", { method: "POST", body: JSON.stringify({ orderData }) }),
+    apiCall("/user/orders", {
+      method: "POST",
+      body: JSON.stringify({ orderData }),
+    }),
 };
 
 // Health check
